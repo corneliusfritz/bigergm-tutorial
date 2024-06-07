@@ -399,6 +399,8 @@ gof_res <- gof(
   n_sim = 100, 
   # Compute the geodesic distance for the observed and each simulated network
   compute_geodesic_distance = TRUE,
+  # Set a seed for reproducibility
+  seed = 1234,
   # Start at the observed network
   start_from_observed = TRUE, 
   # The control parameters for the simulation

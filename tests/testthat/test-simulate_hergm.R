@@ -107,9 +107,7 @@ test_that("simulating a network from a given network works", {
       control_within = ergm::control.simulate.formula(
         MCMC.burnin = 100,
         MCMC.interval = 10
-      ),
-      seed_for_within = 1,
-      seed_for_between = 1,
+      ),seed = 1,
       n_sim = 1,
       only_within = TRUE
     )
@@ -126,8 +124,7 @@ test_that("simulating a network from a given network works", {
         MCMC.burnin = 0,
         MCMC.interval = 1
       ),
-      seed_for_within = 1,
-      seed_for_between = 1,
+      seed = 1,
       n_sim = 1, 
       only_within = TRUE
     )

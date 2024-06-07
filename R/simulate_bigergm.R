@@ -88,7 +88,8 @@ simulate_bigergm <- function(formula,
   ### For between-block network
   # Exclude all N() terms for the between-network model
   ### Here, the LHS network object can be arbitrary as long as the RHS is correct.
-  formula_for_simulation_between <- separate_formulas(formula_for_simulation_within)[[1]]
+  network_blocked <- get_within_networks(network, network%v%"block")
+  formula_for_simulation_between <- separate_formulas(formula_for_simulation_within, network = network_blocked)[[1]]
   term_names <- rownames(attr(terms(formula_for_simulation_between),"factors"))
   if(sum(grepl("N\\(",term_names))>0){
     formula_for_simulation_between <- update(formula_for_simulation_between, 
@@ -133,7 +134,7 @@ simulate_bigergm <- function(formula,
   }
   
   edgelist_within <- draw_within_block_connection(
-    seed_network = network,
+    seed_network = network_blocked,
     formula_for_simulation = formula_for_simulation_within,
     coef_within_block = coef_within,
     ergm_control = control_within,

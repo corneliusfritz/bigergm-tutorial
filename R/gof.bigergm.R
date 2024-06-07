@@ -65,10 +65,10 @@ swap_formula_network <- function(new_net, net_formula, env) {
 # terms which introduce dyadic dependence.
 # @param target_formula a target formula
 # @return a list containing the between and within formulas
-separate_formulas <- function(target_formula) {
+separate_formulas <- function(target_formula, network = ergm.getnetwork(target_formula)) {
   str_net <- as.character(target_formula)[2]
   net <- get(str_net, envir = environment(target_formula))
-  terms <- ergm::ergm_model(target_formula)$terms
+  terms <- ergm::ergm_model(target_formula,nw = network)$terms
   varnames <- list_rhs.formula(target_formula) %>% as.character()
   dep_terms <-
     terms %>% purrr::map(function(t) {
@@ -76,6 +76,7 @@ separate_formulas <- function(target_formula) {
       is_dep <- is.null(dep) || dep
     }) %>% unlist()
   between_rhs <- varnames[!dep_terms]
+  between_rhs <- between_rhs[!is.na(between_rhs)]
   if(length(between_rhs) == 0){
     between_rhs <- "edges"
   }

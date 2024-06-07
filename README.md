@@ -32,11 +32,11 @@ local level.
 
 # Installation
 
-You can install the github version of `bigergm` by running the following
+You can install the CRAN version of `bigergm` by running the following
 command:
 
 ``` r
-devtools::install_github("corneliusfritz/bigergm-tutorial"). 
+install.packages("bigergm")
 ```
 
 # A simple example
@@ -95,10 +95,10 @@ bigergm_res <-bigergm(
     # The model you would like to estimate
     object = model_formula,
     # The number of blocks
-    n_blocks = 4,
+    n_clusters = 4,
     # The maximum number of MM algorithm steps
     n_MM_step_max = 100,
-    # The tolerance for the MM algorithm
+    # The tolarence for the MM algorithm
     tol_MM_step = 1e-6,
     # Perform parameter estimation after the block recovery step
     estimate_parameters = TRUE,
@@ -164,8 +164,7 @@ summary(bigergm_res$est_between)
 # For the within networks
 summary(bigergm_res$est_within)
 #> Call:
-#> ergm::ergm(formula = within_formula, offset.coef = offset.coef, 
-#>     estimate = method, control = control)
+#> ergm::ergm(formula = within_formula, estimate = method, control = control)
 #> 
 #> Maximum Pseudolikelihood Results:
 #> 

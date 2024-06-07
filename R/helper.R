@@ -231,7 +231,8 @@ ari <- function(z_star, z) {
 get_within_networks <- function(network, block, combined_networks = TRUE){
   block <- as.integer(block)
   is_directed <- network$gal$directed
-  
+  old_vertexnames <- network%v% "vertex.names"
+  network%v% "vertex.names" <- 1:length(network%v% "vertex.names")
   # Get the edge list and constrain them to be edges where the involved actors are in the same block
   edge_list <- network::as.edgelist(network)
   edge_list <- cbind(edge_list,block[edge_list[,1]],block[edge_list[,2]])
@@ -248,24 +249,31 @@ get_within_networks <- function(network, block, combined_networks = TRUE){
   }
   if(!combined_networks){
     edge_list <- as.data.frame(edge_list[,c(1,2)])
-    return(as.network(edge_list, vertices = data_attribute, directed = is_directed))
+    tmp <- as.network(edge_list, vertices = data_attribute, directed = is_directed)
+    tmp%v% "vertex.names" <- old_vertexnames[tmp%v% "vertex.names"]
+    return(tmp)
   }  else{
     networks <- list()
     unique_block <- sort(unique(block))
     for(i in 1:length(unique_block)){
       # cat(i,"\n")
       tmp_edges <- as.data.frame(matrix(edge_list[edge_list[,3] == unique_block[i],1:2],ncol = 2))
+      
       tmp_attributes <- data_attribute[data_attribute$block == unique_block[i],]
       # tmp_edges[,1] <- match(tmp_edges[,1],tmp_attributes$vertex.names)
       # tmp_edges[,2] <- match(tmp_edges[,2],tmp_attributes$vertex.names)
       if(nrow(tmp_edges)>0){
-        networks[[i]] <- as.network(tmp_edges, vertices = tmp_attributes, directed = is_directed)
+        tmp <- as.network(tmp_edges, vertices = tmp_attributes, directed = is_directed)
+        tmp%v% "vertex.names" <- old_vertexnames[tmp%v% "vertex.names"]
+        networks[[i]] <- tmp
       } 
       else {
-        networks[[i]] <- as.network(data.frame(tmp_attributes$vertex.names[1],
+        tmp <- as.network(data.frame(tmp_attributes$vertex.names[1],
                                                tmp_attributes$vertex.names[2]),
                                     vertices = tmp_attributes, directed = is_directed)
-        delete.edges(networks[[i]],eid = 1)
+        delete.edges(tmp,eid = 1)
+        tmp%v% "vertex.names" <- old_vertexnames[tmp%v% "vertex.names"]
+        networks[[i]] <- tmp
       }
     }
     return(Networks(networks))
