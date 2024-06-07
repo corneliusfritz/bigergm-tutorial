@@ -126,9 +126,9 @@ This allows for a more flexible model that can capture the cohesive subgroups in
 
 # Installation
 
-You can install the CRAN version of `bigergm` by running the following command:
+You can install the github version of `bigergm` by running the following command:
 ```{r, eval=FALSE}
-install.packages("bigergm")
+devtools::install_github("corneliusfritz/bigergm-tutorial")
 ```
 
 
