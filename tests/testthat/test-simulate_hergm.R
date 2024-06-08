@@ -12,7 +12,7 @@ test_that("combining within- and between-block edgelists while removing duplicat
     dplyr::arrange(tail) %>%
     as.matrix()
 
-  # Get edgelist from R function
+    # Get edgelist from R function
   edgelist <- combine_within_between_edges(edgelist_within, edgelist_between, 
                                            use_fast_between_simulation = FALSE,
                                            old_vertex_names = c(1,2,3,4,5))
@@ -107,17 +107,15 @@ test_that("simulating a network from a given network works", {
       control_within = ergm::control.simulate.formula(
         MCMC.burnin = 100,
         MCMC.interval = 10
-      ),seed = 1,
+      ),
+      seed = 1,
       n_sim = 1,
       only_within = TRUE
     )
-  
-  formula_alt <- g_sim ~ edges + nodematch("x") + nodematch("y") + triangle + kstar(2)
-  
   # Simulate a network from a given edgelist
   g2 <-
     simulate_bigergm(
-      formula = formula_alt,
+      formula = formula,network = g_sim,
       coef_within = list_within_params,
       coef_between = list_between_params,
       control_within = ergm::control.simulate.formula(

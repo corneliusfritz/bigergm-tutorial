@@ -359,7 +359,7 @@ draw_within_block_connection <- function(seed_network,
   
   if(n_sim>1){
     # Match the vertex.names of the seed network to the blocked network
-    matching_tmp <- match(seed_network_blocked%v% "vertex.names", seed_network%v% "vertex.names")
+    matching_tmp <- match(seed_network_blocked%v% "vertex.names", 1:length(seed_network_blocked%v% "vertex.names"))
     if (output == "edgelist") {
       within_conn <- lapply(within_conn, function(x) {
         x$.head <- matching_tmp[x$.head]
@@ -370,7 +370,7 @@ draw_within_block_connection <- function(seed_network,
     }
     } else {
     # Match the vertex.names of the seed network to the blocked network
-    matching_tmp <- match(seed_network_blocked%v% "vertex.names", seed_network%v% "vertex.names")
+    matching_tmp <- match(seed_network_blocked%v% "vertex.names", 1:length(seed_network_blocked%v% "vertex.names"))
     if (output == "edgelist") {
       within_conn$.head <- matching_tmp[within_conn$.head]
       within_conn$.tail <- matching_tmp[within_conn$.tail]

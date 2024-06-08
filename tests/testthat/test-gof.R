@@ -226,20 +226,19 @@ test_that("Within-connections GOF can be started from the observed network", {
     MCMC.burnin = 0,
     MCMC.interval = 1
   )
-
-  test_gof_res <-   test_gof_res <-gof(
+  test_gof_res <-gof(
     sim$bigergm_res,
-    control_within= control_within,
+    control_within = control_within,
     start_from_observed = TRUE,
-    n_sim = 3, type = "within"
+    n_sim = 2, type = "within"
   )
 
-  first_simulation_stats <-test_gof_res$simulated$network_stats %>%
+  first_simulation_stats <- test_gof_res$simulated$network_stats %>%
     dplyr::filter(n_sim == 1) %>%
     dplyr::select(-n_sim)
 
   original_network_stats <- test_gof_res$original$network_stats
-  expect_equal(original_network_stats, first_simulation_stats)
+  expect_equal(original_network_stats,first_simulation_stats)
 
   })
 
