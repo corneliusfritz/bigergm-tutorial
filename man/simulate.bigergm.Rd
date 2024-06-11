@@ -21,7 +21,7 @@
 
 \item{seed}{seed value (integer) for network simulation.}
 
-\item{...}{Additional arguments, to be passed to lower-level functions (see \code{\link{simulate_bigergm}})}
+\item{...}{Additional arguments, passed to \code{\link[ergm]{simulate_formula}}.}
 
 \item{output}{Normally character, one of "network" (default), "stats", "edgelist", to determine the output of the function.}
 

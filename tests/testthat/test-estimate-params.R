@@ -84,7 +84,7 @@ est_between <- est_between(
 
 est_within <- est_within(
   formula = g ~ edges + nodematch("x1"),
-  network = g, seeds = 1,
+  network = g, seed = 1,
   method_within = "MPLE", 
   add_intercepts = FALSE
 )

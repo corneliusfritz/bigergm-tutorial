@@ -19,7 +19,7 @@ bigergm(
   virtualenv_python = "r-bigergm",
   seed_infomap = NULL,
   weight_for_initialization = 1000,
-  seeds = NULL,
+  seed = NULL,
   method_within = "MPLE",
   control_within = ergm::control.ergm(),
   clustering_with_features = TRUE,
@@ -43,11 +43,15 @@ For the details on the possible \code{<model terms>}, see
 All terms that induce dependence are excluded from the between block model, while the within block model includes all terms.
 When you pass a \code{\link{bigergm}} class object to the function, you continue from the previous MM step.
 Note that the block allocation (which is either provided by parameter \code{blocks} or estimated in the first step) is saved as the vertex.attribute \code{block} of the network.
-This attribute can also be used in the specified formula.}
+This attribute can also be used in the specified formula.
+The \code{\link[ergm.multi]{L-ergmTerm}} is supported to enable size-dependent coefficients for the within-blocks model.
+Note, however, that for size-dependent parameters of terms that are included in the between-blocks model,
+the intercept in the linear model provided to \code{\link[ergm.multi]{L-ergmTerm}} should not include the intercept.
+See the second example below for a demonstration.}
 
 \item{add_intercepts}{Boolean value to indicate whether adequate intercepts
 should be added to the provided formula so that the model in the first stage
-of the estimation is a nested model of the estimated model in the second stage of the estimation}
+of the estimation is a nested model of the estimated model in the second stage of the estimation.}
 
 \item{n_blocks}{The number of blocks. This must be specified by the user.
 When you pass a \code{\link{bigergm}} class object to the function, you don't have to specify this argument.}
@@ -78,17 +82,17 @@ If \code{walktrap}, the walktrap clustering algorithm as implemented in \code{\l
 If \code{initialization}
 is a vector of integers of the same length as the number of nodes in the provided network (in \code{object}),
 then the provided vector is used as the initial cluster assignment.
-If \code{initialization} is a string, \code{\link{bigergm}} will try to interpret it as block allocations saved in Python's infomap .clu format.}
+If \code{initialization} is a string relating to a file path, \code{\link{bigergm}} will interpret it as block allocations saved in Python's infomap .clu format under that path.}
 
 \item{use_infomap_python}{If \code{TRUE}, the cluster initialization is implemented using Pythons' infomap.}
 
 \item{virtualenv_python}{Which virtual environment should be used for the infomap algorithm?}
 
-\item{seed_infomap}{seed value (integer) for the infomap algorithm, which can be used to initialize the estimation of the blocks}
+\item{seed_infomap}{seed value (integer) for the infomap algorithm, which can be used to initialize the estimation of the blocks.}
 
 \item{weight_for_initialization}{weight value used for cluster initialization. The higher this value, the more weight is put on the initialized block allocation.}
 
-\item{seeds}{seed value (integer) for the random number generator}
+\item{seed}{seed value (integer) for the random number generator.}
 
 \item{method_within}{If "MPLE" (the default), then the maximum pseudolikelihood estimator is implemented when estimating the within-block network model.
 If "MLE", then an approximate maximum likelihood estimator is conducted. If "CD" (EXPERIMENTAL), the Monte-Carlo contrastive divergence estimate is returned.}
@@ -111,7 +115,7 @@ If the network is large, we strongly recommend to set to be \code{FALSE}.}
 
 \item{only_use_preprocessed}{If \code{TRUE}, the function only uses the preprocessed data from a previous fit but does not continue the estimation from its final iteration, instead the estimation is started again from the provided initialization.}
 
-\item{...}{Additional arguments, to be passed to lower-level functions}
+\item{...}{Additional arguments, to be passed to lower-level functions (mainly to the \code{\link[ergm]{ergm}} function used for the estimation of within-block connections).}
 }
 \value{
 An object of class 'bigergm' including the results of the fitted model.
@@ -165,6 +169,51 @@ bigergm_res <- bigergm(
   # Indicate that clustering must take into account nodematch on characteristics
   check_blocks = FALSE)
   
+ # Example with N() operator
+ 
+ \dontrun{
+set.seed(1)
+# Prepare ingredients for simulating a network
+N <- 500
+K <- 10
+
+list_within_params <- c(1, 2, 2,-0.5)
+list_between_params <- c(-8, 0.5, -0.5)
+formula <- g ~ edges + nodematch("x") + nodematch("y")  + N(~edges,~log(n)-1)
+
+memb <- sample(1:K,prob = c(0.1,0.2,0.05,0.05,0.10,0.1,0.1,0.1,0.1,0.1), 
+               size = N, replace = TRUE)
+vertex_id <- as.character(11:(11 + N - 1))
+
+x <- sample(1:2, size = N, replace = TRUE)
+y <- sample(1:2, size = N, replace = TRUE)
+
+
+df <- tibble::tibble(
+  id = vertex_id,
+  memb = memb,
+  x = x,
+  y = y
+)
+g <- network::network.initialize(n = N, directed = FALSE)
+g \%v\% "vertex.names" <- df$id
+g \%v\% "block" <- df$memb
+g \%v\% "x" <- df$x
+g \%v\% "y" <- df$y
+
+# Simulate a network
+g_sim <-
+  simulate_bigergm(
+    formula = formula,
+    coef_within = list_within_params,
+    coef_between = list_between_params,
+    nsim = 1, 
+    control_within = control.simulate.formula(MCMC.burnin = 200000))
+
+estimation <- bigergm(update(formula,new = g_sim~.), n_blocks = 10, 
+                      verbose = T)
+summary(estimation)
+}
 }
 \references{
 Babkin, S., Stewart, J., Long, X., and M. Schweinberger (2020). Large-scale estimation of random graph models with local dependence. Computational Statistics and Data Analysis, 152, 1--19.

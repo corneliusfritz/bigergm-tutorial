@@ -78,15 +78,15 @@ run_MM_with_features <- function(numOfVertices, numOfClasses, alpha, list_multip
     .Call('_bigergm_run_MM_with_features', PACKAGE = 'bigergm', numOfVertices, numOfClasses, alpha, list_multiplied_feature_adjmat, tau, verbose, directed)
 }
 
-simulate_between_network <- function(numOfVertices, list_feature_adjmat, coef_between, block_membership, directed) {
-    .Call('_bigergm_simulate_between_network', PACKAGE = 'bigergm', numOfVertices, list_feature_adjmat, coef_between, block_membership, directed)
+simulate_between_network <- function(numOfVertices, list_feature_adjmat, coef_between, block_membership, directed, seed) {
+    .Call('_bigergm_simulate_between_network', PACKAGE = 'bigergm', numOfVertices, list_feature_adjmat, coef_between, block_membership, directed, seed)
 }
 
-simulate_between_network_covariates <- function(numOfVertices, coef_between, list_feature_adjmat, block_membership, directed) {
-    .Call('_bigergm_simulate_between_network_covariates', PACKAGE = 'bigergm', numOfVertices, coef_between, list_feature_adjmat, block_membership, directed)
+simulate_between_network_covariates <- function(numOfVertices, coef_between, list_feature_adjmat, block_membership, directed, seed) {
+    .Call('_bigergm_simulate_between_network_covariates', PACKAGE = 'bigergm', numOfVertices, coef_between, list_feature_adjmat, block_membership, directed, seed)
 }
 
-simulate_between_network_no_covariates <- function(numOfVertices, coef_between, block_membership, directed) {
-    .Call('_bigergm_simulate_between_network_no_covariates', PACKAGE = 'bigergm', numOfVertices, coef_between, block_membership, directed)
+simulate_between_network_no_covariates <- function(numOfVertices, coef_between, block_membership, directed, seed) {
+    .Call('_bigergm_simulate_between_network_no_covariates', PACKAGE = 'bigergm', numOfVertices, coef_between, block_membership, directed, seed)
 }
 

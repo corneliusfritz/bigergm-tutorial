@@ -250,8 +250,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // simulate_between_network
-arma::sp_mat simulate_between_network(int numOfVertices, const Rcpp::List& list_feature_adjmat, const arma::vec& coef_between, const arma::vec& block_membership, bool directed);
-RcppExport SEXP _bigergm_simulate_between_network(SEXP numOfVerticesSEXP, SEXP list_feature_adjmatSEXP, SEXP coef_betweenSEXP, SEXP block_membershipSEXP, SEXP directedSEXP) {
+arma::sp_mat simulate_between_network(int numOfVertices, const Rcpp::List& list_feature_adjmat, const arma::vec& coef_between, const arma::vec& block_membership, bool directed, int& seed);
+RcppExport SEXP _bigergm_simulate_between_network(SEXP numOfVerticesSEXP, SEXP list_feature_adjmatSEXP, SEXP coef_betweenSEXP, SEXP block_membershipSEXP, SEXP directedSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -260,13 +260,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type coef_between(coef_betweenSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type block_membership(block_membershipSEXP);
     Rcpp::traits::input_parameter< bool >::type directed(directedSEXP);
-    rcpp_result_gen = Rcpp::wrap(simulate_between_network(numOfVertices, list_feature_adjmat, coef_between, block_membership, directed));
+    Rcpp::traits::input_parameter< int& >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(simulate_between_network(numOfVertices, list_feature_adjmat, coef_between, block_membership, directed, seed));
     return rcpp_result_gen;
 END_RCPP
 }
 // simulate_between_network_covariates
-arma::sp_mat simulate_between_network_covariates(const int numOfVertices, const Rcpp::List& coef_between, const Rcpp::List& list_feature_adjmat, const arma::vec& block_membership, bool directed);
-RcppExport SEXP _bigergm_simulate_between_network_covariates(SEXP numOfVerticesSEXP, SEXP coef_betweenSEXP, SEXP list_feature_adjmatSEXP, SEXP block_membershipSEXP, SEXP directedSEXP) {
+arma::sp_mat simulate_between_network_covariates(const int numOfVertices, const Rcpp::List& coef_between, const Rcpp::List& list_feature_adjmat, const arma::vec& block_membership, bool directed, int& seed);
+RcppExport SEXP _bigergm_simulate_between_network_covariates(SEXP numOfVerticesSEXP, SEXP coef_betweenSEXP, SEXP list_feature_adjmatSEXP, SEXP block_membershipSEXP, SEXP directedSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -275,13 +276,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::List& >::type list_feature_adjmat(list_feature_adjmatSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type block_membership(block_membershipSEXP);
     Rcpp::traits::input_parameter< bool >::type directed(directedSEXP);
-    rcpp_result_gen = Rcpp::wrap(simulate_between_network_covariates(numOfVertices, coef_between, list_feature_adjmat, block_membership, directed));
+    Rcpp::traits::input_parameter< int& >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(simulate_between_network_covariates(numOfVertices, coef_between, list_feature_adjmat, block_membership, directed, seed));
     return rcpp_result_gen;
 END_RCPP
 }
 // simulate_between_network_no_covariates
-arma::sp_mat simulate_between_network_no_covariates(const int numOfVertices, const arma::sp_mat& coef_between, const arma::vec& block_membership, bool directed);
-RcppExport SEXP _bigergm_simulate_between_network_no_covariates(SEXP numOfVerticesSEXP, SEXP coef_betweenSEXP, SEXP block_membershipSEXP, SEXP directedSEXP) {
+arma::sp_mat simulate_between_network_no_covariates(const int numOfVertices, const arma::sp_mat& coef_between, const arma::vec& block_membership, bool directed, int& seed);
+RcppExport SEXP _bigergm_simulate_between_network_no_covariates(SEXP numOfVerticesSEXP, SEXP coef_betweenSEXP, SEXP block_membershipSEXP, SEXP directedSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -289,7 +291,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type coef_between(coef_betweenSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type block_membership(block_membershipSEXP);
     Rcpp::traits::input_parameter< bool >::type directed(directedSEXP);
-    rcpp_result_gen = Rcpp::wrap(simulate_between_network_no_covariates(numOfVertices, coef_between, block_membership, directed));
+    Rcpp::traits::input_parameter< int& >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(simulate_between_network_no_covariates(numOfVertices, coef_between, block_membership, directed, seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -311,9 +314,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bigergm_compute_quadratic_term_with_features_directed", (DL_FUNC) &_bigergm_compute_quadratic_term_with_features_directed, 6},
     {"_bigergm_compute_pi_with_features", (DL_FUNC) &_bigergm_compute_pi_with_features, 4},
     {"_bigergm_run_MM_with_features", (DL_FUNC) &_bigergm_run_MM_with_features, 7},
-    {"_bigergm_simulate_between_network", (DL_FUNC) &_bigergm_simulate_between_network, 5},
-    {"_bigergm_simulate_between_network_covariates", (DL_FUNC) &_bigergm_simulate_between_network_covariates, 5},
-    {"_bigergm_simulate_between_network_no_covariates", (DL_FUNC) &_bigergm_simulate_between_network_no_covariates, 4},
+    {"_bigergm_simulate_between_network", (DL_FUNC) &_bigergm_simulate_between_network, 6},
+    {"_bigergm_simulate_between_network_covariates", (DL_FUNC) &_bigergm_simulate_between_network_covariates, 6},
+    {"_bigergm_simulate_between_network_no_covariates", (DL_FUNC) &_bigergm_simulate_between_network_no_covariates, 5},
     {NULL, NULL, 0}
 };
 

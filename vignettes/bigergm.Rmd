@@ -357,7 +357,7 @@ The `simulate.bigergm()` function is a wrapper around the `simulate_bigergm()` f
 To apply the `simulate.bigergm()` function, you only need to provide the fitted `bigergm` object.
 
 ```{r, message=FALSE, echo=TRUE}
-simulate(res)
+simulate(res, seed = 1)
 ```
 
 The `simulate_bigergm()` function allows you to simulate networks with local dependence from scratch.
@@ -372,7 +372,7 @@ sim_net <- bigergm::simulate_bigergm(
    # The coefficients for the within connections
   coef_within = res$est_within$coefficients,
   # Number of simulations to return
-  n_sim = 1,
+  nsim = 1,
   # If `stats` a list with network statistics 
   # for the between and within connections is returned
   output = "network"
@@ -396,7 +396,7 @@ gof_res <- gof(
   # The object returned by bigergm::bigergm()
   object = res,
   # The number of simulations to use
-  n_sim = 100, 
+  nsim = 100, 
   # Compute the geodesic distance for the observed and each simulated network
   compute_geodesic_distance = TRUE,
   # Set a seed for reproducibility

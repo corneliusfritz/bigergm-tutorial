@@ -31,7 +31,7 @@ simulate_network <- function(){
       coef_between = list_between_params,
       control_within = ergm::control.simulate.formula(MCMC.burnin = 1000000, MCMC.interval = 1000),
       seed = 1,
-      n_sim = 1,
+      nsim = 1,
       output = "network"
     )
 }

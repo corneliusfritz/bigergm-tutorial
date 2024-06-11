@@ -3,13 +3,13 @@
 summary.bigergm <- function(object, ...) {
   cat("Call:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
-  cat("Found", length(unique(object$block)), "clusters of relative sizes \n", table(object$block)/length(object$block))
+  cat("Found", length(unique(object$block)), "clusters of relative sizes: \n", table(object$block)/length(object$block))
   
   if(object$estimate_parameters){
-    cat("Results of within-cluster estimation: \n")
+    cat("\n\nResults of within-cluster estimation: \n")
     tmp_est_within <- summary(object$est_within)
     print(tmp_est_within, print.message = FALSE, print.call = FALSE, print.deviance = FALSE)
-    cat("Results of between-cluster estimation: \n")
+    cat("\nResults of between-cluster estimation: \n")
     tmp_est_between <- summary(object$est_between)
     print(tmp_est_between, print.message = FALSE, print.call = FALSE, print.deviance = FALSE)
     cat("AIC:", tmp_est_within$aic + tmp_est_between$aic,"BIC: ",tmp_est_within$bic + tmp_est_between$bic)
@@ -103,13 +103,13 @@ generate_combinations_vectorized <- function(n, directed) {
 print.bigergm <- function(x, ...) {
   cat("Call:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
-  cat("Found", length(unique(x$block)), "clusters of relative sizes \n", 
+  cat("Found", length(unique(x$block)), "clusters of relative sizes: \n", 
       table(x$block)/length(x$block), "\n")
   
   if(x$estimate_parameters){
-    cat("Results of within-cluster estimation: \n")
+    cat("\nResults of within-cluster estimation: \n")
     print(x$est_within$coefficients)
-    cat("Results of between-cluster estimation: \n")
+    cat("\nResults of between-cluster estimation: \n")
     print(x$est_between$coefficients)
   }
 }

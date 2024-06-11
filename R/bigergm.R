@@ -28,9 +28,13 @@
 #' When you pass a \code{\link{bigergm}} class object to the function, you continue from the previous MM step.
 #' Note that the block allocation (which is either provided by parameter \code{blocks} or estimated in the first step) is saved as the vertex.attribute `block` of the network. 
 #' This attribute can also be used in the specified formula.
+#' The \code{\link[ergm.multi]{L-ergmTerm}} is supported to enable size-dependent coefficients for the within-blocks model. 
+#' Note, however, that for size-dependent parameters of terms that are included in the between-blocks model, 
+#' the intercept in the linear model provided to \code{\link[ergm.multi]{L-ergmTerm}} should not include the intercept. 
+#' See the second example below for a demonstration. 
 #' @param add_intercepts Boolean value to indicate whether adequate intercepts 
 #' should be added to the provided formula so that the model in the first stage 
-#' of the estimation is a nested model of the estimated model in the second stage of the estimation
+#' of the estimation is a nested model of the estimated model in the second stage of the estimation.
 #' @param n_blocks The number of blocks. This must be specified by the user.
 #' When you pass a \code{\link{bigergm}} class object to the function, you don't have to specify this argument.
 #' @param n_cores The number of CPU cores to use.
@@ -53,12 +57,12 @@
 #' If \code{initialization} 
 #' is a vector of integers of the same length as the number of nodes in the provided network (in \code{object}),
 #' then the provided vector is used as the initial cluster assignment.  
-#' If \code{initialization} is a string, \code{\link{bigergm}} will try to interpret it as block allocations saved in Python's infomap .clu format.
+#' If \code{initialization} is a string relating to a file path, \code{\link{bigergm}} will interpret it as block allocations saved in Python's infomap .clu format under that path.
 #' @param use_infomap_python If `TRUE`, the cluster initialization is implemented using Pythons' infomap.
 #' @param virtualenv_python Which virtual environment should be used for the infomap algorithm? 
-#' @param seed_infomap seed value (integer) for the infomap algorithm, which can be used to initialize the estimation of the blocks
+#' @param seed_infomap seed value (integer) for the infomap algorithm, which can be used to initialize the estimation of the blocks.
 #' @param weight_for_initialization weight value used for cluster initialization. The higher this value, the more weight is put on the initialized block allocation.
-#' @param seeds seed value (integer) for the random number generator
+#' @param seed seed value (integer) for the random number generator.
 #' @param method_within If "MPLE" (the default), then the maximum pseudolikelihood estimator is implemented when estimating the within-block network model.
 #' If "MLE", then an approximate maximum likelihood estimator is conducted. If "CD" (EXPERIMENTAL), the Monte-Carlo contrastive divergence estimate is returned. 
 #' @param control_within A list of control parameters for the \code{\link[ergm]{ergm}} function used to estimate the parameters of the within model. See \code{\link[ergm]{control.ergm}} for details.
@@ -71,7 +75,7 @@
 #' @param check_blocks If TRUE, this function keeps track of estimated block memberships at each MM iteration.
 #' @param cache a `cachem` cache object used to store intermediate calculations such as eigenvector decomposition results.
 #' @param return_checkpoint If `TRUE`, the function returns the checkpoint list. For most applications, this should be set to `TRUE` but if memory space needed by the output is an issue, set to `FALSE`.
-#' @param ... Additional arguments, to be passed to lower-level functions
+#' @param ... Additional arguments, to be passed to lower-level functions (mainly to the \code{\link[ergm]{ergm}} function used for the estimation of within-block connections).
 #' @references 
 #' Babkin, S., Stewart, J., Long, X., and M. Schweinberger (2020). Large-scale estimation of random graph models with local dependence. Computational Statistics and Data Analysis, 152, 1--19.
 #' 
@@ -151,6 +155,51 @@
 #'   # Indicate that clustering must take into account nodematch on characteristics
 #'   check_blocks = FALSE)
 #'   
+#'  # Example with N() operator
+#'  
+#'  \dontrun{
+#' set.seed(1)
+#' # Prepare ingredients for simulating a network
+#' N <- 500
+#' K <- 10
+#' 
+#' list_within_params <- c(1, 2, 2,-0.5)
+#' list_between_params <- c(-8, 0.5, -0.5)
+#' formula <- g ~ edges + nodematch("x") + nodematch("y")  + N(~edges,~log(n)-1)
+#' 
+#' memb <- sample(1:K,prob = c(0.1,0.2,0.05,0.05,0.10,0.1,0.1,0.1,0.1,0.1), 
+#'                size = N, replace = TRUE)
+#' vertex_id <- as.character(11:(11 + N - 1))
+#' 
+#' x <- sample(1:2, size = N, replace = TRUE)
+#' y <- sample(1:2, size = N, replace = TRUE)
+#' 
+#' 
+#' df <- tibble::tibble(
+#'   id = vertex_id,
+#'   memb = memb,
+#'   x = x,
+#'   y = y
+#' )
+#' g <- network::network.initialize(n = N, directed = FALSE)
+#' g %v% "vertex.names" <- df$id
+#' g %v% "block" <- df$memb
+#' g %v% "x" <- df$x
+#' g %v% "y" <- df$y
+#' 
+#' # Simulate a network
+#' g_sim <-
+#'   simulate_bigergm(
+#'     formula = formula,
+#'     coef_within = list_within_params,
+#'     coef_between = list_between_params,
+#'     nsim = 1, 
+#'     control_within = control.simulate.formula(MCMC.burnin = 200000))
+#' 
+#' estimation <- bigergm(update(formula,new = g_sim~.), n_blocks = 10, 
+#'                       verbose = T)
+#' summary(estimation)
+#' }
 #' @export
 bigergm <- function(object,
                     add_intercepts = FALSE, 
@@ -166,7 +215,7 @@ bigergm <- function(object,
                     virtualenv_python = "r-bigergm",
                     seed_infomap = NULL,
                     weight_for_initialization = 1000,
-                    seeds = NULL,
+                    seed = NULL,
                     method_within = "MPLE",
                     control_within = ergm::control.ergm(),
                     clustering_with_features = TRUE,
@@ -266,7 +315,7 @@ bigergm <- function(object,
         "estimate_parameters",
         "verbose",
         "n_MM_step_max",
-        "seeds",
+        "seed",
         "method_within",
         "compute_pi",
         "check_alpha_update",
@@ -313,7 +362,7 @@ bigergm <- function(object,
   
   # Estimate the memberships if they are not specified.
   if (!all_blockss_fixed) {
-    set.seed(seeds[1])
+    set.seed(seed)
     # Estimate the block memberships
     answer <- MM_wrapper(
       network = network,
@@ -402,7 +451,7 @@ bigergm <- function(object,
     if (verbose == 0) {
       suppressMessages(est_within <- est_within(formula =formula,network = network,
                                                 block = blocks,number_cores = n_cores,
-                                                seeds = NULL,method = method_within,
+                                                seed = NULL,method = method_within,
                                                 add_intercepts = add_intercepts,
                                                 clustering_with_features = clustering_with_features,
                                                 control = control_within,
@@ -410,7 +459,7 @@ bigergm <- function(object,
     } else {
       est_within <- est_within(formula =formula,network = network,
                                block = blocks,number_cores = n_cores,
-                               seeds = NULL,method = method_within,
+                               seed = NULL,method = method_within,
                                add_intercepts = add_intercepts,
                                clustering_with_features = clustering_with_features,
                                control = control_within,
@@ -445,7 +494,7 @@ bigergm <- function(object,
       estimate_parameters = estimate_parameters,
       verbose = verbose,
       n_MM_step_max = n_MM_step_max,
-      seeds = seeds,
+      seed = seed,
       method_within = method_within,
       compute_pi = compute_pi,
       check_alpha_update = check_alpha_update,

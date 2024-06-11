@@ -56,7 +56,7 @@ test_that("Returned GOF dataframe has the correct fields", {
   test_gof_res <- gof(
     sim$bigergm_res,
     control_within = sim$control_within,
-    n_sim = 3, 
+    nsim = 3, 
     compute_geodesic_distance = FALSE
   )
   
@@ -77,7 +77,7 @@ test_that("GOF network stats have the right fields and terms", {
   test_gof_res <- gof(
     sim$bigergm_res,
     control_within = sim$control_within,
-    n_sim = 3
+    nsim = 3
   )
 
   expected_terms <- ergm::ergm_model(sim$bigergm_res$est_within$formula)$terms %>%
@@ -89,7 +89,7 @@ test_that("GOF network stats have the right fields and terms", {
     stat_type_df <- test_gof_res[[stat_type]]
     actual_terms <- colnames(stat_type_df$network_stats)
 
-    actual_terms[stringr::str_detect(actual_terms, "n_sim", negate = TRUE)] %>%
+    actual_terms[stringr::str_detect(actual_terms, "nsim", negate = TRUE)] %>%
       setdiff(c("value", "stat")) %>%
       length() %>%
       expect_equal(0)
@@ -110,14 +110,14 @@ test_that("GOF degree stats have the right fields and terms", {
   test_gof_res <- gof(
     sim$bigergm_res,
     control_within = sim$control_within,
-    n_sim = 3
+    nsim = 3
   )
 
   for (stat_type in c("original", "simulated")) {
     stat_type_df <- test_gof_res[[stat_type]]
     actual_terms <- colnames(stat_type_df$degree_dist)
 
-    actual_terms[stringr::str_detect(actual_terms, "n_sim", negate = TRUE)] %>%
+    actual_terms[stringr::str_detect(actual_terms, "nsim", negate = TRUE)] %>%
       setdiff(c("degree", "share")) %>%
       length() %>%
       expect_equal(0)
@@ -136,14 +136,14 @@ test_that("GOF esp stats have the right fields and terms", {
   test_gof_res <-  gof(
     sim$bigergm_res,
     control_within = sim$control_within,
-    n_sim = 3
+    nsim = 3
   )
 
   
   for (stat_type in c("original", "simulated")) {
     stat_type_df <- test_gof_res[[stat_type]]
     actual_terms <- colnames(stat_type_df$esp_dist)
-    actual_terms[stringr::str_detect(actual_terms, "n_sim", negate = TRUE)] %>%
+    actual_terms[stringr::str_detect(actual_terms, "nsim", negate = TRUE)] %>%
       setdiff(c("label", "esp")) %>%
       length() %>%
       expect_equal(0)
@@ -162,14 +162,14 @@ test_that("GOF geodesic distance is returned when requested", {
   test_gof_res <-  gof(
     sim$bigergm_res,
     control_within = sim$control_within,
-    n_sim = 3, compute_geodesic_distance = TRUE
+    nsim = 3, compute_geodesic_distance = TRUE
   )
 
   for (stat_type in c("original", "simulated")) {
     stat_type_df <- test_gof_res[[stat_type]]
     actual_terms <- colnames(stat_type_df$geodesic_dist)
 
-    actual_terms[stringr::str_detect(actual_terms, "n_sim", negate = TRUE)] %>%
+    actual_terms[stringr::str_detect(actual_terms, "nsim", negate = TRUE)] %>%
       setdiff(c("dist", "pairs")) %>%
       length() %>%
       expect_equal(0)
@@ -190,7 +190,7 @@ test_that("Return GOF statistics including only within-block connections", {
   test_gof_res <-gof(
     sim$bigergm_res,
     control_within = sim$control_within,
-    n_sim = 3, type = "within", 
+    nsim = 3, type = "within", 
     compute_geodesic_distance = FALSE
   )
 
@@ -230,12 +230,12 @@ test_that("Within-connections GOF can be started from the observed network", {
     sim$bigergm_res,
     control_within = control_within,
     start_from_observed = TRUE,
-    n_sim = 2, type = "within"
+    nsim = 2, type = "within"
   )
 
   first_simulation_stats <- test_gof_res$simulated$network_stats %>%
-    dplyr::filter(n_sim == 1) %>%
-    dplyr::select(-n_sim)
+    dplyr::filter(nsim == 1) %>%
+    dplyr::select(-nsim)
 
   original_network_stats <- test_gof_res$original$network_stats
   expect_equal(original_network_stats,first_simulation_stats)
@@ -255,12 +255,12 @@ test_that("Full GOF can be started from the observed network", {
     sim$bigergm_res, 
     type = 'full',
     control_within = control_within,
-    n_sim = 2,
+    nsim = 2,
     start_from_observed = TRUE
   )
 
   first_simulation_stats <-test_gof_res$simulated$network_stats %>%
-    dplyr::filter(n_sim == 1)
+    dplyr::filter(nsim == 1)
 
   # If it starts from the observed network, the stats should not be zero
   expect_true(all(first_simulation_stats['value'] > 0))

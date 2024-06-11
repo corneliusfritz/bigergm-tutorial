@@ -11,7 +11,7 @@ Model for big networks}
   type = "full",
   control_within = ergm::control.simulate.formula(),
   seed = NULL,
-  n_sim = 100,
+  nsim = 100,
   compute_geodesic_distance = TRUE,
   start_from_observed = TRUE,
   simulate_sbm = FALSE
@@ -20,22 +20,23 @@ Model for big networks}
 \arguments{
 \item{object}{An \code{\link{bigergm}} object.}
 
-\item{...}{Additional arguments, to be passed to lower-level functions
+\item{...}{Additional arguments, to be passed to \code{\link{simulate_bigergm}},
+which, in turn, passes the information to \code{\link[ergm]{simulate_formula}}.
 See documentation for \code{\link{bigergm}}.}
 
 \item{type}{the type of evaluation to perform. Can take the values \code{full} or \code{within}. \code{full} performs the evaluation on all edges, and \code{within} only considers within-block edges.}
 
-\item{control_within}{MCMC parameters as an instance of \code{control.simulate.formula} to be used for the within-block simulations}
+\item{control_within}{MCMC parameters as an instance of \code{control.simulate.formula} to be used for the within-block simulations.}
 
-\item{seed}{the seed to be passed to simulate_bigergm}
+\item{seed}{the seed to be passed to simulate_bigergm. If \code{NULL}, a random seed is used.}
 
-\item{n_sim}{the number of simulations to employ for calculating goodness of fit}
+\item{nsim}{the number of simulations to employ for calculating goodness of fit, default is 100.}
 
 \item{compute_geodesic_distance}{if \code{TRUE}, the distribution of geodesic distances is also computed (considerably increases computation time on large networks. \code{FALSE} by default.)}
 
-\item{start_from_observed}{if \code{TRUE}, MCMC uses the observed network as a starting point}
+\item{start_from_observed}{if \code{TRUE}, MCMC uses the observed network as a starting point. If \code{FALSE}, MCMC starts from a random network.}
 
-\item{simulate_sbm}{if \code{TRUE}, the between-block connections are simulated from the estimated stochastic block model from the first stage}
+\item{simulate_sbm}{if \code{TRUE}, the between-block connections are simulated from the estimated stochastic block model from the first stage not the estimated ERGM.}
 }
 \value{
 \code{\link{gof.bigergm}} returns a list with two entries.
@@ -60,7 +61,7 @@ data(toyNet)
 model_formula <- toyNet ~ edges + nodematch("x") + nodematch("y") + triangle
 estimate <- bigergm(model_formula,n_blocks = 4)
 gof_res <- gof(estimate,
-n_sim = 100
+nsim = 100
 )
 plot(gof_res)
 }

@@ -17,8 +17,9 @@
 #' The network object must contain block information as a vertex attribute with the name 'block'.
 #' For the details on the possible \code{<model terms>}, see
 #' \code{\link[ergm]{ergmTerm}} and Morris, Handcock and Hunter (2008).
+#' The \code{\link[ergm.multi]{L-ergmTerm}} is supported to enable size-dependent coefficients.
 #' @param network a network object with one vertex attribute called 'block' representing which node belongs to which block
-#' @param seeds seed value (integer) for the random number generator
+#' @param seed seed value (integer) for the random number generator
 #' @param method If "MPLE" (the default), then the maximum pseudolikelihood estimator is returned.
 #' If "MLE", then an approximate maximum likelihood estimator is returned.
 #' @param add_intercepts Boolean value to indicate whether adequate intercepts 
@@ -58,7 +59,7 @@
 #'   parallel = FALSE,
 #'   verbose = 0,
 #'   initial_estimate = NULL,
-#'   seeds = NULL,
+#'   seed = NULL,
 #'   method = "MPLE", 
 #'   add_intercepts = FALSE,
 #'   clustering_with_features = FALSE
@@ -67,7 +68,7 @@
 est_within <-
   function(formula,
            network,
-           seeds = NULL,
+           seed = NULL,
            method = "MPLE",
            add_intercepts = TRUE, 
            clustering_with_features = FALSE, 

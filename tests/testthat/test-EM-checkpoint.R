@@ -32,7 +32,7 @@ test_that("Setting a checkpoint for MM iterations works", {
       coef_between = list_between_params,
       control_within = ergm::control.simulate.formula(MCMC.burnin = 1000, MCMC.interval = 10),
       seed = 1,
-      n_sim = 1,
+      nsim = 1,
       output = "network"
     )
 
@@ -54,7 +54,7 @@ test_that("Setting a checkpoint for MM iterations works", {
       check_lower_bound = TRUE,
       check_block_membership = TRUE,
       weight_for_initialization = initial_weight,
-      seeds = 334
+      seed = 334
     )
 
   
@@ -72,7 +72,7 @@ test_that("Setting a checkpoint for MM iterations works", {
       check_block_membership = TRUE,
       weight_for_initialization = initial_weight,
       check_alpha_update = TRUE,
-      seeds = 334
+      seed = 334
     )
 
   second_step <-
@@ -122,7 +122,7 @@ test_that("Setting a checkpoint for MM iterations works", {
       check_lower_bound = TRUE,
       check_block_membership = TRUE,
       weight_for_initialization = initial_weight,
-      seeds = 334
+      seed = 334
     )
 
   # Conduct clustering in two steps
@@ -140,7 +140,7 @@ test_that("Setting a checkpoint for MM iterations works", {
       check_lower_bound = TRUE,
       check_block_membership = TRUE,
       weight_for_initialization = initial_weight,
-      seeds = 334
+      seed = 334
     )
   second_step_without_feature <-
     bigergm::bigergm(

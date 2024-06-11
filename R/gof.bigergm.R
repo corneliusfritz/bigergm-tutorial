@@ -146,12 +146,12 @@ get_gof_stats <- function(sim_formula, net = NULL,net_within = NULL, sim_number 
   )
 
   if (!is.null(sim_number)) {
-    stats$network_stats$n_sim <- sim_number
-    stats$degree_dist$n_sim <- sim_number
-    stats$esp_dist$n_sim <- sim_number
+    stats$network_stats$nsim <- sim_number
+    stats$degree_dist$nsim <- sim_number
+    stats$esp_dist$nsim <- sim_number
 
     if (!is.null(stats$geodesic_dist)) {
-      stats$geodesic_dist$n_sim <- sim_number
+      stats$geodesic_dist$nsim <- sim_number
     }
   }
   stats
@@ -170,7 +170,8 @@ get_gof_stats <- function(sim_formula, net = NULL,net_within = NULL, sim_number 
 #' size (and many other settings) can be changed using the \code{ergm_control} 
 #' argument described above.
 #' @param object An \code{\link{bigergm}} object.
-#' @param ... Additional arguments, to be passed to lower-level functions
+#' @param ... Additional arguments, to be passed to \code{\link{simulate_bigergm}}, 
+#' which, in turn, passes the information to \code{\link[ergm]{simulate_formula}}.
 #' See documentation for \code{\link{bigergm}}.
 #' @examples
 #' data(toyNet)
@@ -181,17 +182,17 @@ get_gof_stats <- function(sim_formula, net = NULL,net_within = NULL, sim_number 
 #'model_formula <- toyNet ~ edges + nodematch("x") + nodematch("y") + triangle
 #'estimate <- bigergm(model_formula,n_blocks = 4)
 #'gof_res <- gof(estimate,
-#'n_sim = 100
+#'nsim = 100
 #')
 #'plot(gof_res)
 #' }
 #' @param type the type of evaluation to perform. Can take the values `full` or `within`. `full` performs the evaluation on all edges, and `within` only considers within-block edges.
-#' @param control_within MCMC parameters as an instance of `control.simulate.formula` to be used for the within-block simulations
-#' @param seed the seed to be passed to simulate_bigergm
-#' @param n_sim the number of simulations to employ for calculating goodness of fit
+#' @param control_within MCMC parameters as an instance of `control.simulate.formula` to be used for the within-block simulations.
+#' @param seed the seed to be passed to simulate_bigergm. If `NULL`, a random seed is used.
+#' @param nsim the number of simulations to employ for calculating goodness of fit, default is 100.
 #' @param compute_geodesic_distance if `TRUE`, the distribution of geodesic distances is also computed (considerably increases computation time on large networks. `FALSE` by default.)
-#' @param start_from_observed if `TRUE`, MCMC uses the observed network as a starting point
-#' @param simulate_sbm if `TRUE`, the between-block connections are simulated from the estimated stochastic block model from the first stage
+#' @param start_from_observed if `TRUE`, MCMC uses the observed network as a starting point. If `FALSE`, MCMC starts from a random network.
+#' @param simulate_sbm if `TRUE`, the between-block connections are simulated from the estimated stochastic block model from the first stage not the estimated ERGM.
 #' @return \code{\link{gof.bigergm}} returns a list with two entries. 
 #' The first entry 'original' is another list of the network stats, degree distribution, edgewise-shared partner distribution, and geodesic distance distribution (if \code{compute_geodesic_distance = TRUE}) of the observed network. 
 #' The second entry is called 'simulated' is also list compiling the network stats, degree distribution, edgewise-shared partner distribution, and geodesic distance distribution (if \code{compute_geodesic_distance = TRUE}) of all simulated networks.  
@@ -200,7 +201,7 @@ gof.bigergm <- function(object, ...,
                         type = 'full',
                         control_within = ergm::control.simulate.formula(),
                         seed = NULL,
-                        n_sim = 100,
+                        nsim = 100,
                         compute_geodesic_distance = TRUE,
                         start_from_observed = TRUE, 
                         simulate_sbm = FALSE) {
@@ -259,13 +260,13 @@ gof.bigergm <- function(object, ...,
       network = net, 
       control_within = control_within,
       seed = seed,
-      n_sim = n_sim,
+      nsim = nsim,
       output = "network", 
       within_formula = object$est_within$within_formula,
       add_intercepts = object$checkpoint$add_intercepts,
       clustering_with_features = object$checkpoint$clustering_with_features, 
       sbm_pi = object$sbm_pi, 
-      simulate_sbm = simulate_sbm
+      simulate_sbm = simulate_sbm, ...
     )
   } else {
     simulated_networks <- simulate_bigergm(
@@ -275,7 +276,7 @@ gof.bigergm <- function(object, ...,
       control_within = control_within,
       network = net, 
       seed = seed,
-      n_sim = n_sim,
+      nsim = nsim,
       output = "network", 
       only_within = TRUE, 
       within_formula = object$est_within$within_formula,
@@ -283,7 +284,7 @@ gof.bigergm <- function(object, ...,
       clustering_with_features = object$checkpoint$clustering_with_features, 
       sbm_pi = object$sbm_pi, 
       simulate_sbm = simulate_sbm, 
-      return_within = TRUE
+      return_within = TRUE, ...
     )
   }
   # Get the statistics for all simulated networks

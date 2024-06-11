@@ -32,7 +32,7 @@ test_that("generating multiple within-block networks works", {
     formula = formula,
     control_within = ergm::control.simulate.formula(),
     seed = 1,
-    n_sim = 3, only_within = TRUE, output = "stats",
+    nsim = 3, only_within = TRUE, output = "stats",
     coef_between = list_between_params,
     coef_within = list_within_params
   )
@@ -78,7 +78,7 @@ test_that("simulating a network from a given edgelist works", {
       formula = formula,
       control_within = ergm::control.simulate.formula(),
       seed = 1,
-      n_sim = 1, only_within = TRUE, output = "network",
+      nsim = 1, only_within = TRUE, output = "network",
       coef_between = list_between_params,
       coef_within = list_within_params
     )
@@ -94,7 +94,7 @@ test_that("simulating a network from a given edgelist works", {
       MCMC.interval = 1
     ),
     seed = 1,
-    n_sim = 1, only_within = TRUE, output = "network",
+    nsim = 1, only_within = TRUE, output = "network",
     coef_between = list_between_params,
     coef_within = list_within_params
   ) 
@@ -147,7 +147,7 @@ test_that("The within-simulation begins from an empty network by default", {
         MCMC.interval = 1
       ),
       seed = 1,
-      n_sim = 1, only_within = TRUE, output = "network",
+      nsim = 1, only_within = TRUE, output = "network",
       coef_between = list_between_params,
       coef_within = list_within_params
     )

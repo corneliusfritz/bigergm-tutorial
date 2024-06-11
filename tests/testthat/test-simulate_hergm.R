@@ -56,9 +56,8 @@ test_that("correctly attaching vertex ids, block memberships, and vertex feature
       coef_within = list_within_params,
       coef_between = list_between_params,
       control_within = ergm::control.simulate.formula(),
-      seed_for_within = 1,
-      seed_for_between = 1,
-      n_sim = 1
+      seed = 1,
+      nsim = 1
     )
   
   
@@ -109,7 +108,7 @@ test_that("simulating a network from a given network works", {
         MCMC.interval = 10
       ),
       seed = 1,
-      n_sim = 1,
+      nsim = 1,
       only_within = TRUE
     )
   # Simulate a network from a given edgelist
@@ -123,7 +122,7 @@ test_that("simulating a network from a given network works", {
         MCMC.interval = 1
       ),
       seed = 1,
-      n_sim = 1, 
+      nsim = 1, 
       only_within = TRUE
     )
   
@@ -134,6 +133,106 @@ test_that("simulating a network from a given network works", {
   # Check if the network is correctly generated
   expect_equal(nrow(g_sim), nrow(g2))
   expect_true(all(g_sim == g2))
+})
+
+test_that("simulating a network with a seed works", {
+  set.seed(1)
+  # Prepare ingredients for simulating a network
+  N <- 100
+  K <- 3
+  
+  list_within_params <- c(-3, 1, 1, 0.76, 0.08)
+  list_between_params <- c(-5, 2, 2)
+  formula <- g ~ edges + nodematch("x") + nodematch("y") + triangle + kstar(2)
+  
+  memb <- sample(1:K, size = N, replace = TRUE)
+  vertex_id <- as.character(11:(11 + N - 1))
+  
+  x <- sample(1:20, size = N, replace = TRUE)
+  y <- sample(LETTERS, size = N, replace = TRUE)
+  
+  df <- tibble::tibble(
+    id = vertex_id,
+    memb = memb,
+    x = x,
+    y = y
+  )
+  g <- network::network.initialize(n = N, directed = FALSE)
+  g %v% "vertex.names" <- df$id
+  g %v% "block" <- df$memb
+  g %v% "x" <- df$x
+  g %v% "y" <- df$y
+  
+  
+  # Simulate a network only within-block
+  g_sim <-
+    simulate_bigergm(
+      formula = formula,
+      coef_within = list_within_params,
+      coef_between = list_between_params,
+      seed = 1,
+      nsim = 1,
+      only_within = TRUE
+    )
+  # Simulate a network from a given edgelist
+  g_sim2 <-
+    simulate_bigergm(
+      formula = formula,
+      coef_within = list_within_params,
+      coef_between = list_between_params,
+      seed = 1,
+      nsim = 1, 
+      only_within = TRUE
+    )
+  g_sim <- network::as.edgelist(g_sim)
+  g_sim2 <- network::as.edgelist(g_sim2)
+  expect_equal(g_sim, g_sim2)
+  
+  # Simulate whole network 
+  g_sim <-
+    simulate_bigergm(
+      formula = formula,
+      coef_within = list_within_params,
+      coef_between = list_between_params,
+      seed = 123,
+      nsim = 1
+    )
+  # Simulate a network from a given edgelist
+  g_sim2 <-
+    simulate_bigergm(
+      formula = formula,
+      coef_within = list_within_params,
+      coef_between = list_between_params,
+      seed = 123,
+      nsim = 1
+    )
+  g_sim <- network::as.edgelist(g_sim)
+  g_sim2 <- network::as.edgelist(g_sim2)
+  expect_equal(g_sim, g_sim2)
+
+  
+  # Simulate two networks and check the  
+  g_sim <-
+    simulate_bigergm(
+      formula = formula,
+      coef_within = list_within_params,
+      coef_between = list_between_params,
+      seed = 123,
+      nsim = 2, 
+      output = "stats"
+    )
+  # Simulate a network from a given edgelist
+  g_sim2 <-
+    simulate_bigergm(
+      formula = formula,
+      coef_within = list_within_params,
+      coef_between = list_between_params,
+      seed = 123,
+      nsim = 2, 
+      output = "stats"
+    )
+  expect_equal(g_sim$between_network, g_sim2$between_network)
+  expect_equal(g_sim$within_network, g_sim2$within_network)
 })
 
 test_that("The simulation begins from the observed network given in the formula", {
@@ -168,9 +267,8 @@ test_that("The simulation begins from the observed network given in the formula"
         MCMC.burnin = 0,
         MCMC.interval = 1
       ),
-      seed_for_within = 1,
-      seed_for_between = 1,
-      n_sim = 1, 
+      seed = 1,
+      nsim = 1, 
       only_within = TRUE
     )
 
@@ -210,9 +308,8 @@ test_that("generating multiple networks works", {
       formula = formula,
       coef_within = list_within_params,
       coef_between = list_between_params,
-      seed_for_within = 1,
-      seed_for_between = 1,
-      n_sim = 3
+      seed = 1,
+      nsim = 3
     )
   
   expect_equal(length(g_sim), 3)
@@ -250,9 +347,8 @@ test_that("generating stats and avoiding generating within-block links while sim
       formula = formula,
       coef_within = list_within_params,
       coef_between = list_between_params,
-      seed_for_within = 1,
-      seed_for_between = 1,
-      n_sim = 3, output = "stats"
+      seed = 1,
+      nsim = 3, output = "stats"
     )
 
   # Check whether network stats are generated.
@@ -282,9 +378,8 @@ test_that("Simulating networks using formula without externality terms works", {
     formula = formula,
     coef_within = list_within_params,
     coef_between = list_between_params,
-    seed_for_within = 1,
-    seed_for_between = 1,
-    n_sim = 3
+    seed= 1,
+    nsim = 3
   ), NA)
 })
 
@@ -310,9 +405,8 @@ test_that("Simulating networks using formula without covariates works", {
     formula = formula,
     coef_within = list_within_params,
     coef_between = list_between_params,
-    seed_for_within = 1,
-    seed_for_between = 1,
-    n_sim = 3
+    seed= 1,
+    nsim = 3
   ), NA)
 })
 
@@ -346,7 +440,7 @@ test_that("Setting output = 'edgelist' returns a single edgelist for the full
         MCMC.burnin = 100000,
         MCMC.interval = 500
       ),
-      n_sim = 1,
+      nsim = 1,
       output = output
     )
   }
@@ -397,7 +491,7 @@ test_that("Setting output = 'edgelist' returns a list of full-network edgelists"
         MCMC.burnin = 100000,
         MCMC.interval = 500
       ),
-      n_sim = 3,
+      nsim = 3,
       output = output
     )
   }

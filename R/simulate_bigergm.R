@@ -10,16 +10,20 @@
 #' For the details on the possible \code{<model terms>}, see
 #' \code{\link[ergm]{ergmTerm}} and Morris, Handcock and Hunter (2008).
 #' All terms that induce dependence are excluded from the between block model, while the within block model includes all terms.
+#' The \code{\link[ergm.multi]{L-ergmTerm}} is supported to enable size-dependent coefficients for the within-blocks model. 
+#' Note, however, that for size-dependent parameters of terms that are included in the between-blocks model, 
+#' the intercept in the linear model provided to \code{\link[ergm.multi]{L-ergmTerm}} should not include the intercept. 
+#' See the second example of \code{\link{bigergm}} for a demonstration. 
 #' @param coef_within a vector of within-block parameters. The order of the parameters should match that of the formula.
 #' @param coef_between a vector of between-block parameters. The order of the parameters should match that of the formula without externality terms.
-#' @param control_within auxiliary function as user interface for fine-tuning ERGM simulation for within-block networks
+#' @param control_within auxiliary function as user interface for fine-tuning ERGM simulation for within-block networks.
 #' @param seed seed value (integer) for network simulation.
-#' @param n_sim number of networks generated
+#' @param nsim number of networks generated.
 #' @param network a network object to be used as a seed network for the simulation (if none is provided, the network on the lhs of the `formula` is used).
 #' @param only_within If this is TRUE, only within-block networks are simulated.
 #' @param output Normally character, one of "network" (default), "stats", "edgelist", to determine the output format.
 #' @param verbose If this is TRUE/1, the program will print out additional information about the progress of simulation.
-#' @param ... Additional arguments, to be passed to lower-level functions
+#' @param ... Additional arguments, passed to \code{\link[ergm]{simulate_formula}}.
 #'
 #' @references 
 #' Morris M, Handcock MS, Hunter DR (2008). Specification of Exponential-Family Random Graph Models: Terms and Computational Aspects.
@@ -37,7 +41,7 @@
 #' # The coefficients for the between connections
 #' coef_within = c(-1.7,0.5,0.6,0.15),
 #' # The coefficients for the within connections
-#' n_sim = 10,
+#' nsim = 10,
 #' # Number of simulations to return
 #' output = "stats",
 #' # Type of output
@@ -56,7 +60,7 @@ simulate_bigergm <- function(formula,
                            control_within = ergm::control.simulate.formula(),
                            only_within = FALSE,
                            seed = NULL,
-                           n_sim = 1,
+                           nsim = 1,
                            output = "network",
                            verbose = 0,
                            ...) {
@@ -140,8 +144,9 @@ simulate_bigergm <- function(formula,
     ergm_control = control_within,
     output = temp,
     seed = seed,
-    n_sim = n_sim,
-    verbose = verbose
+    nsim = nsim,
+    verbose = verbose, 
+    ...
   )
   
   ############################################################################
@@ -157,7 +162,7 @@ simulate_bigergm <- function(formula,
       formula_for_simulation = formula_for_simulation_between,
       coef_between_block = coef_between,
       seed = seed,
-      n_sim = n_sim,
+      nsim = nsim,
       verbose = verbose,
       draw_networks = !only_within, ...
     )
@@ -166,7 +171,7 @@ simulate_bigergm <- function(formula,
   # if("return_within" %in% names(list_info)){
   #   if(list_info$"return_within"){
   #     browser()  
-  #     if (n_sim == 1) {
+  #     if (nsim == 1) {
   #       
   #     }
   #     res <- append(res,edgelist_within)
@@ -177,12 +182,12 @@ simulate_bigergm <- function(formula,
   #   }
   # }
   
-  if((n_sim>1)& (output == "edgelist")){
-    # Shorten if number of effective samples is smaller than n_sim
+  if((nsim>1)& (output == "edgelist")){
+    # Shorten if number of effective samples is smaller than nsim
     edgelist_between$output <- edgelist_between$output[1:length(edgelist_within)]
   }
   if (output %in% c('network', 'edgelist')) {
-    if (n_sim == 1) {
+    if (nsim == 1) {
       # Combine within- and between-block edges while removing duplicated links.
       edgelist <- combine_within_between_edges(edgelist_within, edgelist_between$output, TRUE, old_vertex_names)
       if (output == 'edgelist'){
@@ -219,7 +224,7 @@ simulate_bigergm <- function(formula,
 
       # Return the output
       if (verbose > 0) {
-        message(glue::glue("{n_sim} entire networks have been generated."))
+        message(glue::glue("{nsim} entire networks have been generated."))
       }
       res <- append(res,simulation_output)
     }
@@ -257,7 +262,7 @@ simulate_bigergm <- function(formula,
 #' @param output Normally character, one of "network" (default), "stats", "edgelist", to determine the output of the function.
 #' @param control_within \code{\link[ergm]{control.simulate.formula}} object for fine-tuning ERGM simulation of within-block networks.
 #' @param nsim number of networks to be randomly drawn from the given distribution on the set of all networks.
-#' @param ... Additional arguments, to be passed to lower-level functions (see \code{\link{simulate_bigergm}})
+#' @param ... Additional arguments, passed to \code{\link[ergm]{simulate_formula}}.
 #'
 #' @return Simulated networks, the output form depends on the parameter \code{output} 
 #' (default is a list of networks).
@@ -280,7 +285,7 @@ simulate.bigergm <- function (object, nsim = 1, seed = NULL, ..., output = "netw
     coef_between = object$est_between$coefficients,
     control_within = control_within,
     seed = seed,
-    n_sim = nsim,
+    nsim = nsim,
     output = output,
     verbose = verbose,
     within_formula = object$est_within$within_formula,
@@ -311,7 +316,7 @@ extract_covariate_names <- function(formula_for_simulation){
 # @param ergm_control auxiliary function as user interface for fine-tuning ERGM simulation
 # @param output Normally character, one of "network" (default), "stats", "edgelist", to determine the output format.
 # @param seed seed value (integer) for the random number generator.
-# @param n_sim Number of networks to be randomly drawn from the given distribution on the set of all networks.
+# @param nsim Number of networks to be randomly drawn from the given distribution on the set of all networks.
 # @param verbose If this is TRUE/1, the program will print out additionalinformation about the progress of simulation.
 # @param ... Additional arguments, to be passed to lower-level functions
 # @export
@@ -322,7 +327,7 @@ draw_within_block_connection <- function(seed_network,
                                          ergm_control,
                                          output = "network",
                                          seed,
-                                         n_sim,
+                                         nsim,
                                          verbose,
                                          ...) {
   # Extract the RHS of the formula
@@ -340,24 +345,29 @@ draw_within_block_connection <- function(seed_network,
   } else {
     seed_network_blocked <- get_within_networks(seed_network, seed_network%v%"block")
   }
-  # Simulate within-block links
-  within_conn <- ergm::simulate_formula(
-    object = formula_for_simulation,
-    basis = seed_network_blocked,
-    nsim = n_sim,
-    coef = coef_within_block,
-    seed = seed,
-    control = ergm_control,
-    output = output,
-    verbose = verbose
+  # Simulate within-block links 
+  # The suppressWarnings is necessary because the simulate_formula function throws a warning if some of the ... parameters are not used.
+  suppressWarnings(
+    within_conn <- ergm::simulate_formula(
+      object = formula_for_simulation,
+      basis = seed_network_blocked,
+      nsim = nsim,
+      coef = coef_within_block,
+      seed = seed,
+      control = ergm_control,
+      output = output,
+      verbose = verbose, 
+      ...
+    )  
   )
+  
   # Cut out empty networks (we might have to change this at some point)
-  if((n_sim>1)& (output == "edgelist")){
+  if((nsim>1)& (output == "edgelist")){
     within_conn <- within_conn[unlist(lapply(within_conn, function(x) !is.null(dim(x))))]  
   }
 
   
-  if(n_sim>1){
+  if(nsim>1){
     # Match the vertex.names of the seed network to the blocked network
     matching_tmp <- match(seed_network_blocked%v% "vertex.names", 1:length(seed_network_blocked%v% "vertex.names"))
     if (output == "edgelist") {
@@ -389,12 +399,15 @@ draw_between_block_connection <- function(network,
                                           formula_for_simulation,
                                           coef_between_block,
                                           seed = NULL,
-                                          n_sim = 1,
+                                          nsim = 1,
                                           verbose = 0,
                                           ergm_control = ergm::control.simulate.formula(),
                                           draw_networks = TRUE, 
                                           ...) {
-  # Set seed
+  # Set seed if it is not provided
+  if(is.null(seed)){
+    seed <- sample.int(10^5, 1)
+  }
   set.seed(seed)
   # Number of nodes
   N_node <- network$gal$n
@@ -404,7 +417,7 @@ draw_between_block_connection <- function(network,
   if(draw_networks){
     # This just changes the type of sparse matrices from "nsCMatrix" to "dsCMatrix"
     preprocessed_features$list_sparse_feature_adjmat <- lapply(preprocessed_features$list_sparse_feature_adjmat, function(x) x*1)
-    sim_between <- function() {
+    sim_between <- function(seed) {
       # Simulate one between-block network. The output format is a sparse matrix.
       if("add_intercepts" %in% names(dot_list) && "clustering_with_features" %in% names(dot_list)){
         if(dot_list$add_intercepts && dot_list$clustering_with_features && dot_list$simulate_sbm){
@@ -412,12 +425,12 @@ draw_between_block_connection <- function(network,
                                                               list_feature_adjmat = preprocessed_features$list_sparse_feature_adjmat,
                                                               block_membership = as.numeric(network %v% "block"), 
                                                               coef_between = lapply(dot_list$sbm_pi, function(x) as(Class = "dgCMatrix", object = x)),
-                                                              directed = network$gal$directed)
+                                                              directed = network$gal$directed, seed = seed)
         } else if(dot_list$add_intercepts && !dot_list$clustering_with_features && dot_list$simulate_sbm){
           between_conn <- simulate_between_network_no_covariates(numOfVertices = N_node,
                                                                  block_membership = as.numeric(network %v% "block"), 
                                                                  coef_between = as(Class = "dgCMatrix", object = dot_list$sbm_pi),
-                                                                 directed = network$gal$directed)
+                                                                 directed = network$gal$directed, seed = seed)
         } else {
           coef_between_block <- check_edge_term(coef_between_block)
           between_conn <- simulate_between_network(
@@ -425,7 +438,7 @@ draw_between_block_connection <- function(network,
             list_feature_adjmat = preprocessed_features$list_sparse_feature_adjmat,
             coef_between = coef_between_block,
             block_membership = network %v% "block",
-            directed =  network$gal$directed
+            directed =  network$gal$directed, seed = seed
           )
         }
       } else {
@@ -436,7 +449,7 @@ draw_between_block_connection <- function(network,
           list_feature_adjmat = preprocessed_features$list_sparse_feature_adjmat,
           coef_between = coef_between_block,
           block_membership = network %v% "block",
-          directed =  network$gal$directed
+          directed =  network$gal$directed, seed = seed
         )
       }
       
@@ -459,8 +472,8 @@ draw_between_block_connection <- function(network,
     
     
     # If you simulate just one between-block network:
-    if (n_sim == 1) {
-      output <- sim_between()
+    if (nsim == 1) {
+      output <- sim_between(seed)
       if (verbose > 0) {
         message("Simulated one between-block network.")
       }
@@ -469,12 +482,13 @@ draw_between_block_connection <- function(network,
     }
     
     # If you simulate more than one between-block network:
-    if (n_sim > 1) {
+    if (nsim > 1) {
+      i = 0
       output <-
-        foreach(i = 1:n_sim) %do% {
-          net <- sim_between()
+        foreach(i = 1:nsim) %do% {
+          net <- sim_between(seed*i)
           if (verbose > 0) {
-            message(glue::glue("Finished between-block network simulation {i} of {n_sim}."))
+            message(glue::glue("Finished between-block network simulation {i} of {nsim}."))
           }
           return(net)
         }
@@ -484,11 +498,11 @@ draw_between_block_connection <- function(network,
       return(list(output = output, node_data = preprocessed_features$node_data))
     }
   } else {
-    if(n_sim == 1){
+    if(nsim == 1){
       return(list(output = data.frame(tail = integer(0), head = integer(0)), 
                   node_data = preprocessed_features$node_data))  
     } else {
-      return(list(output = rep(list( data.frame(tail = integer(0), head = integer(0))),n_sim), 
+      return(list(output = rep(list( data.frame(tail = integer(0), head = integer(0))),nsim), 
                   node_data = preprocessed_features$node_data))
     }
     

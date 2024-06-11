@@ -12,7 +12,7 @@ simulate_bigergm(
   control_within = ergm::control.simulate.formula(),
   only_within = FALSE,
   seed = NULL,
-  n_sim = 1,
+  nsim = 1,
   output = "network",
   verbose = 0,
   ...
@@ -25,7 +25,11 @@ simulate_bigergm(
 The network object must contain block information as a vertex attribute with the name 'block'.
 For the details on the possible \code{<model terms>}, see
 \code{\link[ergm]{ergmTerm}} and Morris, Handcock and Hunter (2008).
-All terms that induce dependence are excluded from the between block model, while the within block model includes all terms.}
+All terms that induce dependence are excluded from the between block model, while the within block model includes all terms.
+The \code{\link[ergm.multi]{L-ergmTerm}} is supported to enable size-dependent coefficients for the within-blocks model.
+Note, however, that for size-dependent parameters of terms that are included in the between-blocks model,
+the intercept in the linear model provided to \code{\link[ergm.multi]{L-ergmTerm}} should not include the intercept.
+See the second example of \code{\link{bigergm}} for a demonstration.}
 
 \item{coef_within}{a vector of within-block parameters. The order of the parameters should match that of the formula.}
 
@@ -33,19 +37,19 @@ All terms that induce dependence are excluded from the between block model, whil
 
 \item{network}{a network object to be used as a seed network for the simulation (if none is provided, the network on the lhs of the \code{formula} is used).}
 
-\item{control_within}{auxiliary function as user interface for fine-tuning ERGM simulation for within-block networks}
+\item{control_within}{auxiliary function as user interface for fine-tuning ERGM simulation for within-block networks.}
 
 \item{only_within}{If this is TRUE, only within-block networks are simulated.}
 
 \item{seed}{seed value (integer) for network simulation.}
 
-\item{n_sim}{number of networks generated}
+\item{nsim}{number of networks generated.}
 
 \item{output}{Normally character, one of "network" (default), "stats", "edgelist", to determine the output format.}
 
 \item{verbose}{If this is TRUE/1, the program will print out additional information about the progress of simulation.}
 
-\item{...}{Additional arguments, to be passed to lower-level functions}
+\item{...}{Additional arguments, passed to \code{\link[ergm]{simulate_formula}}.}
 }
 \value{
 Simulated networks, the output form depends on the parameter \code{output}
@@ -67,7 +71,7 @@ coef_between = c(-4.5,0.8, 0.4),
 # The coefficients for the between connections
 coef_within = c(-1.7,0.5,0.6,0.15),
 # The coefficients for the within connections
-n_sim = 10,
+nsim = 10,
 # Number of simulations to return
 output = "stats",
 # Type of output

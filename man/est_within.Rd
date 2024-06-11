@@ -7,7 +7,7 @@
 est_within(
   formula,
   network,
-  seeds = NULL,
+  seed = NULL,
   method = "MPLE",
   add_intercepts = TRUE,
   clustering_with_features = FALSE,
@@ -21,11 +21,12 @@ est_within(
 \code{\link[network]{network}} object.
 The network object must contain block information as a vertex attribute with the name 'block'.
 For the details on the possible \code{<model terms>}, see
-\code{\link[ergm]{ergmTerm}} and Morris, Handcock and Hunter (2008).}
+\code{\link[ergm]{ergmTerm}} and Morris, Handcock and Hunter (2008).
+The \code{\link[ergm.multi]{L-ergmTerm}} is supported to enable size-dependent coefficients.}
 
 \item{network}{a network object with one vertex attribute called 'block' representing which node belongs to which block}
 
-\item{seeds}{seed value (integer) for the random number generator}
+\item{seed}{seed value (integer) for the random number generator}
 
 \item{method}{If "MPLE" (the default), then the maximum pseudolikelihood estimator is returned.
 If "MLE", then an approximate maximum likelihood estimator is returned.}
@@ -72,7 +73,7 @@ formula = g ~ edges,
   parallel = FALSE,
   verbose = 0,
   initial_estimate = NULL,
-  seeds = NULL,
+  seed = NULL,
   method = "MPLE", 
   add_intercepts = FALSE,
   clustering_with_features = FALSE

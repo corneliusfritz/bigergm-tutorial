@@ -26,6 +26,7 @@ test_that("starting EM iterations and parameter estimation from a given vector o
     x = x,
     y = y
   )
+  set.seed(334)
   g <- network::network(x = N,  directed = FALSE)
   g %v% "block" <- df$memb
   g %v% "x" <- df$x
@@ -39,10 +40,9 @@ test_that("starting EM iterations and parameter estimation from a given vector o
       coef_between = list_between_params,
       control_within = ergm::control.simulate.formula(MCMC.burnin = 1000000, MCMC.interval = 1000),
       seed = 1,
-      n_sim = 1,
+      nsim = 1,
       output = "network"
     )
-  
   # Conduct clustering
   cluster_with_feature <-
     bigergm::bigergm(g_sim ~ edges + nodematch("x") + nodematch("y") + triangles,
@@ -56,8 +56,7 @@ test_that("starting EM iterations and parameter estimation from a given vector o
       check_alpha_update = TRUE,
       compute_pi = TRUE,
       check_lower_bound = TRUE,
-      check_blocks = TRUE,
-      seeds = 334
+      check_blocks = TRUE,seed = 123
     )
 
   # Check if starting from the previously estimated block memberships works.
@@ -66,7 +65,7 @@ test_that("starting EM iterations and parameter estimation from a given vector o
                                   initialization = cluster_with_feature$block,
       n_MM_step_max = 2,
       estimate_parameters = FALSE,
-      seeds = 334
+      seed = 123
     ), NA)
 
   # Check if starting from block memberships initialized Python's infomap works.
@@ -75,8 +74,7 @@ test_that("starting EM iterations and parameter estimation from a given vector o
                      initialization =  system.file("extdata", "initialized_cluster_data_by_infomap.clu", package = "bigergm"),
       n_MM_step_max= 1,
       estimate_parameters = FALSE,
-      verbose = 1,
-      seeds = 334
+      verbose = 1,seed = 123,
     ), NA)
 
   
@@ -84,14 +82,14 @@ test_that("starting EM iterations and parameter estimation from a given vector o
   expect_error(result3 <-
     bigergm::bigergm(g_sim ~ edges + nodematch("x") + nodematch("y") + triangles,blocks = result$block,
       verbose = 1,
-      seeds = 334
+      seed = 123
     ), NA)
 
   # Check if not specifying n_blocks when initialized_cluster_data and block_membership are null yields an error.
   expect_error(result4 <-
     bigergm::bigergm(g_sim ~ edges + nodematch("x") + nodematch("y") + triangles,
       verbose = 1,
-      seeds = 334
+      seed = 123
     ))
 
   })

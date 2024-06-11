@@ -7,6 +7,12 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(openmp)]]
 
+inline void set_seed(int seed) {
+  Rcpp::Environment base_env("package:base");
+  Rcpp::Function set_seed_r = base_env["set.seed"];
+  set_seed_r(seed);
+}
+
 // Function that simulates a between-block network.
 // The first element of `coef_between` must be the edges parameter.
 // [[Rcpp::export]]
@@ -15,7 +21,8 @@ arma::sp_mat simulate_between_network
  const Rcpp::List& list_feature_adjmat,
  const arma::vec& coef_between,
  const arma::vec& block_membership,
- bool directed
+ bool directed, 
+ int & seed
 )
 {
   // Number of covariates
@@ -27,6 +34,7 @@ arma::sp_mat simulate_between_network
   for (int p = 0; p < numOfCovariates; p++) {
     feature_cube(p) = Rcpp::as<arma::sp_mat>(list_feature_adjmat[p]);
   }
+  
   // Necessary for R random number generator
   GetRNGstate();
   
@@ -35,10 +43,13 @@ arma::sp_mat simulate_between_network
   // Simulate between-block links
 #pragma omp for
   for (int j = 0; j < numOfVertices; j++) {
+    std::mt19937 generator(seed+j);
+    std::uniform_real_distribution<double>  distr(0.0,1.0);
+    
     for (int i = 0; i < numOfVertices; i++) {
       // Skip as many unnecessary calculations as possible in this nested loop, which makes the computation faster.
       if (block_membership[i] != block_membership[j] && ((directed && i != j) || (!directed && i < j))) {
-        double x = unif_rand();
+        double x = distr(generator);
         double u = coef_between[0];
         for (int p = 0; p < numOfCovariates; p++) {
           double elem = feature_cube(p)(i, j);
@@ -64,7 +75,8 @@ arma::sp_mat simulate_between_network_covariates
  const Rcpp::List & coef_between,
  const Rcpp::List & list_feature_adjmat,
  const arma::vec& block_membership,
- bool directed
+ bool directed,
+ int & seed
 )
 { // Number of covariates
   int numOfCovariates = list_feature_adjmat.length();
@@ -81,7 +93,9 @@ arma::sp_mat simulate_between_network_covariates
   for (int p = 0; p < numOfCovariates; p++) {
     feature_cube(p) = Rcpp::as<arma::sp_mat>(list_feature_adjmat.at(p));
   }
-
+  std::mt19937 generator(seed);
+  std::uniform_real_distribution<double>  distr(0.0,1.0);
+  
   
   // Necessary for R random number generator
   GetRNGstate();
@@ -118,11 +132,12 @@ arma::sp_mat simulate_between_network_no_covariates
 (const int numOfVertices,
  const arma::sp_mat & coef_between,
  const arma::vec& block_membership,
- bool directed
-)
+ bool directed, 
+ int & seed)
 { 
   // Initialize a sparse adjacency matrix for the between-block network
   arma::sp_mat between_adjmat = arma::sp_mat(numOfVertices, numOfVertices);
+  
   // Necessary for R random number generator
   GetRNGstate();
 #pragma omp parallel
@@ -130,10 +145,13 @@ arma::sp_mat simulate_between_network_no_covariates
   // Simulate between-block links
 #pragma omp for 
   for (int j = 0; j < numOfVertices; j++) {
+    std::uniform_real_distribution<double>  distr(0.0,1.0);
+    std::mt19937 generator(seed+j);
+    
     for (int i = 0; i < numOfVertices; i++) {
       // Skip as many unnecessary calculations as possible in this nested loop, which makes the computation faster.
       if (block_membership[i] != block_membership[j] && ((directed && i != j) || (!directed && i < j))) {
-        double x = unif_rand();
+        double x = distr(generator);
         double u = coef_between.at(block_membership[i]-1,block_membership[j]-1);
         if (u > x) {
           // Rcpp::Rcout << "Between " + std::to_string(block_membership[i]) + " and " +std::to_string(block_membership[j]) + "with p = " + std::to_string(u)<< std::endl;
