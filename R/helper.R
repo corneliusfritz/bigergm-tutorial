@@ -29,20 +29,6 @@ copy_vertex_attributes <- function(net, net_tmp){
   return(net)
 }
 
-
-# # Function to get the network in the normal orderback from a within network that is a combined network object
-# get_normal_network <- function(net_within, old_vertexnames){
-#   edgelist_tmp <- as.edgelist(net_within)
-#   tmp_match <- match(net_within%v% "vertex.names",old_vertexnames)
-#   edgelist_tmp[,1] <- tmp_match[edgelist_tmp[,1]]
-#   edgelist_tmp[,2] <- tmp_match[edgelist_tmp[,2]]
-#   attr(edgelist_tmp, "vnames") <- old_vertexnames
-#   net_tmp <- network(edgelist_tmp)
-#   net_tmp <- copy_vertex_attributes(net = net_tmp, net_tmp = net_within)
-#   # summary(net_tmp~edges + nodematch("block"))
-#   return(net_tmp)
-# }
-
 # Function to check if the first entry of a coef_between_block vector corresponds to the edge term and moves it forward if needed 
 check_edge_term <- function(coef_between_block){
   # Check whether the first element of coef_between_block is "edges". If not, move it to the first position.
